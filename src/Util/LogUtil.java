@@ -16,7 +16,7 @@ public class LogUtil {
         try {
             fos = new FileOutputStream(PlayLog, true);
             osw = new OutputStreamWriter(fos, "utf-8");
-            osw.write(now.toString()+"   "+ songNameOrUrl+"-------循环播放\r\n");
+            osw.write(now.toString()+"   "+ songNameOrUrl+"-------播放\r\n");
             osw.flush();
         //    writer.close(); // 最后记得关闭文件
         }catch(IOException e){

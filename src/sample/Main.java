@@ -3,6 +3,7 @@ package sample;
 
 import Util.FileUtil;
 import Util.LogUtil;
+import com.sun.security.auth.SolarisNumericGroupPrincipal;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -17,6 +18,8 @@ import views.list.SongListView;
 import views.song.SongView;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Main extends Application {
@@ -28,7 +31,8 @@ public class Main extends Application {
     //播放日志工具类
     private LogUtil logUtil= new LogUtil();
     private FileUtil fileUtil = new FileUtil();
-    private String songs;
+    private List<String> songs;
+    private int songIndex = 0;
     @Override
     public void start(Stage primaryStage) throws Exception {
 
@@ -37,19 +41,21 @@ public class Main extends Application {
         Button loopButton = new Button("循环");
         Button stopButton = new Button("暂停");
         Button importButton = new Button("引入");
-
+        Button nextButton = new Button("下一首");
         Label songList = new Label();
 
         AnchorPane.setLeftAnchor(loopButton,50.0);
         AnchorPane.setLeftAnchor(stopButton,100.0);
         AnchorPane.setLeftAnchor(importButton,150.0);
         AnchorPane.setTopAnchor(songList,100.0);
-        root.getChildren().addAll(loopButton,stopButton,songList,importButton);
+        AnchorPane.setLeftAnchor(nextButton,200.0);
+        root.getChildren().addAll(loopButton,stopButton,songList,importButton,nextButton);
 
         //SongView songView = new SongView(new File("C:\\Users\\Administrator\\Desktop\\cet601.mp3"));
 
      //   Scene scene = new Scene(songView);
        // songView.startMusic();
+
         Scene scene = new Scene(root);
 
         primaryStage.setScene(scene);
@@ -61,25 +67,39 @@ public class Main extends Application {
         primaryStage.show();
 
 
+
         //播放
        loopButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
 
 
+                if(songs.size()>=songIndex+1){
 
-
-                String songNameOrUrl = "http://sc1.111ttt.cn/2017/1/04/26/297262113196.mp3";
-                File songFile = new File("C:\\Users\\Administrator\\Desktop\\cet601.mp3");
-               // String s1 = "C:\\Users\\Administrator\\Desktop\\www.mp3";
-
-                sound = new Sound(songFile, false);
-                //  sound = new Sound("https://music.163.com/#/song?id=1313354324", false);
-                PlayLog = logUtil.loopWrite(PlayLog,songNameOrUrl);
-
-                sound.loop();// 循环播放
+                        File songFile = new File(songs.get(songIndex));
+                        sound = new Sound(songFile, false);
+                        PlayLog = logUtil.loopWrite(PlayLog,songs.get(songIndex));
+                }
+                sound.play();
             }
         });
+       //简单实现下一首功能
+       nextButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                sound.close();
+                songIndex++;
+                if(songs.size()>=songIndex+1){
+                }else {
+                    songIndex = 0;
+                }
+                File songFile = new File(songs.get(songIndex));
+                sound = new Sound(songFile, false);
+                PlayLog = logUtil.loopWrite(PlayLog,songs.get(songIndex));
+                sound.play();
+            }
+        });
+
         //停止
         stopButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -99,7 +119,15 @@ public class Main extends Application {
 
                 System.out.println(tempPath);
                 songs  = fileUtil.traverseFolder2(tempPath);
-                songList.setText(songs);
+                String tempSP = "";
+                if(songs!=null|| songs.size()>=1){
+                    for(int i = 0;i<songs.size();i++){
+                        tempSP = tempSP+ songs.get(i)+"\n";
+
+                        songList.setText(tempSP);
+                     //   songList.setText("\n");
+                    }
+                }
                 System.out.println(songs);
             }
         });
